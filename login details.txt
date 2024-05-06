@@ -1,0 +1,14 @@
+Heroku
+email:newagenationslab@gmail.com
+password:V6[qfM,/k-!E;hHxSbX<(u
+
+
+NAME CHEAP
+username: bluekey1
+password: Good2Go1@
+
+
+MongoDB
+username: newagenationslab@gmail.com
+password: V6[qfM,/k-!E;hHxSbX<(u
+databasepassword: OANflDztkdDFiYHD
