@@ -25,7 +25,7 @@ router.get("/logout", authController.logout);
 // Registration and login routes
 router.post("/register", authController.register);
 router.post("/login", authController.login);
-router.post("/verify", authController.verify);
+router.post("/verify/:userId", authController.verify);
 
 
 
