@@ -1,7 +1,7 @@
 //authcontroller
 import passport from "passport";
 import User from "../models/user.js";
-// import { sendVerificationEmail } from "../utils/nodeMailer.js";
+import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
 
 
@@ -39,9 +39,9 @@ const authController = {
   
         // Send verification code via email
         try {
-          // await sendVerificationEmail(user.email, verificationcode);
+          await sendVerificationEmail(user.email, verificationcode);
         } catch (emailError) {
-          // console.error('Error sending verification email:', emailError);
+          console.error('Error sending verification email:', emailError);
           // Handle email sending error
           return res.status(500).json({ message: 'Error sending verification email' });
         }
