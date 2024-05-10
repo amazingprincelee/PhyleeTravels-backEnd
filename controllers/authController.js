@@ -47,11 +47,15 @@ const authController = {
         }
   
         // Authentication after registration
-        passport.authenticate('local')(req, res, () => {
-          // Redirect to verify route
-          res.status(200).json({ message: `Verification code sent to ${user.email}`, redirectTo: "/verify" });
+      passport.authenticate('local')(req, res, () => {
+        // Redirect to verify route
+        res.status(200).json({ 
+          message: `Verification code sent to ${user.email}`, 
+          redirectTo: "/verify",
+          userId: user._id // Return user ID
         });
       });
+    });
     } catch (error) {
       console.error('Error during registration:', error);
       return res.status(500).json({ message: 'Unexpected error during registration' });
