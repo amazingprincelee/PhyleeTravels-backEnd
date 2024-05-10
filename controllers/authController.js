@@ -138,9 +138,9 @@ const authController = {
 
 
     // Check if the user is authenticated
-    // if (!req.isAuthenticated()) {
-    //   return res.status(401).json({ message: 'Unauthorized' });
-    // }
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     // Check if the user is already verified
     if (req.user.isVerified) {
