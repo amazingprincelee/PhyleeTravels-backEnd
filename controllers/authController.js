@@ -95,6 +95,15 @@ const authController = {
       });
     })(req, res);
   },
+
+  checkAuth: async (req, res) => {
+    if (req.user) {
+      res.status(201).json({ loggedIn: true, user: req.user });
+    } else {
+      res.status(201).json({ loggedIn: false });
+    }
+  },
+  
   
 
 
