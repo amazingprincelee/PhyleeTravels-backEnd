@@ -88,7 +88,7 @@ const authController = {
             id: user._id,
             username: user.username,
             email: user.email,
-            isVerified: { status: user.isVerified, message: "Alabo, this one na for email verification o" },
+            isVerified: { status: user.isVerified, message: "for email verification" },
           },
         };
         res.status(201).json(responseData);
@@ -138,9 +138,9 @@ const authController = {
 
 
     // Check if the user is authenticated
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+    // if (!req.isAuthenticated()) {
+    //   return res.status(401).json({ message: 'Unauthorized' });
+    // }
 
     // Check if the user is already verified
     if (req.user.isVerified) {
