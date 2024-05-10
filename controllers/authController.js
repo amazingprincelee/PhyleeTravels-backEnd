@@ -122,40 +122,39 @@ const authController = {
 
 
   // Verify 
-verify: async (req, res) => {
+ // Verify 
+ verify: async (req, res) => {
   try {
-    const { userId } = req.params; // Assuming userId is passed as a route parameter
-    const { verifyCode } = req.body;
+    const verifyCode = req.body.verifyCode;
+
 
     // Check if the user is authenticated
-    if (!userId) {
+    if (!req.isAuthenticated()) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Find the user by userId
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
     // Check if the user is already verified
-    if (user.isVerified) {
+    if (req.user.isVerified) {
       return res.status(400).json({ message: 'User is already verified' });
     }
 
+    console.log(req.user.verificationcode, verifyCode);
     // Check if the verification code matches the one in the database
-    if (user.verificationcode !== verifyCode) {
+    if (req.user.verificationcode !== verifyCode) {
       return res.status(400).json({ message: 'Invalid verification code' });
     }
 
+
+
     // Update user's verification status
-    user.isVerified = true;
-    user.verificationcode = null; // Clear the code after successful verification
-    await user.save();
+    req.user.isVerified = true;
+    req.user.verificationcode = null; //clear the code after successful verification
+    await req.user.save();
 
     // Return information to populate dashboard
     return res.status(201).json({
       message: 'Email Verified Successfully, you can login into your account now'
+
     });
 
   } catch (error) {
@@ -163,6 +162,7 @@ verify: async (req, res) => {
     return res.status(500).json({ message: 'Unexpected error during verification' });
   }
 },
+
 
 
 
