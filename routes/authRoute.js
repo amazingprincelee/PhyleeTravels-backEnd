@@ -14,6 +14,13 @@ router.get("/", (req, res) => {
   res.json({ message: "Welcome Newage coin json file" });
 });
 
+router.get("/check-auth", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.status(200).json({ loggedIn: true, user: req.user });
+  } else {
+    res.status(200).json({ loggedIn: false });
+  }
+});
 
 
 
