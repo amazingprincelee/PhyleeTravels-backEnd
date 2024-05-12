@@ -46,15 +46,16 @@ const authController = {
           return res.status(500).json({ message: 'Error sending verification email' });
         }
   
-        // Authentication after registration
         passport.authenticate('local')(req, res, () => {
           // Redirect to verify route
           res.status(200).json({ 
             message: `Verification code sent to ${user.email}`, 
             redirectTo: "/verify",
-            userId: user._id // Return user ID
+            userId: user._id, // Return user ID
+            email: user.email // Return user email
           });
         });
+        
         
     });
     } catch (error) {
