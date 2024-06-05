@@ -28,8 +28,8 @@ export const sendVerificationEmail = async (to, code) => {
   const mailOptions = {
     from: 'noreply@newAgeCoin.cash',
     to,
-    subject: 'Newage Verification Code',
-    text: `Dear User,\n\nYour verification code is: ${code}\n\nThank you for choosing Newage.\n\nBest regards,\nNewage Team`,
+    subject: 'Phylee verification Code',
+    text: `Dear User,\n\nYour verification code is: ${code}\n\nThank you for choosing Phylee Journeys.\n\nBest regards,\nPhylee journeys Team`,
   };
 
   return transporter.sendMail(mailOptions);

@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Welcome message
 router.get("/", (req, res) => {
-  res.json({ message: "Welcome Newage coin json file" });
+  res.json({ message: "Welcome phylee backend json file" });
 });
 
 router.get("/check-auth", authController.checkAuth);

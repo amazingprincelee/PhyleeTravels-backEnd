@@ -14,7 +14,11 @@ const connect = async () => {
   console.log("Database connecting...");
 
   try {
-    await mongoose.connect(`mongodb+srv://newagenationslab:OANflDztkdDFiYHD@cluster0.p9v2gze.mongodb.net/`);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
     
     
     connectionState.connected = true;

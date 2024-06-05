@@ -1,24 +1,25 @@
-//authcontroller
+// authController.js
 import passport from "passport";
 import User from "../models/user.js";
 import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
 
 
-
+// Generate verification code
+const verificationCode = generateVerificationCode();
 
 const authController = {
-
   register: async (req, res) => {
     try {
-      const { username, email, password, phone } = req.body;
+      const { firstName, lastName, email, password, phone } = req.body;
   
       // Generate verification code
       const verificationcode = generateVerificationCode();
   
       // Create a new user instance
       const newUser = new User({
-        username,
+        firstName,
+        lastName,
         email,
         phone,
         verificationcode,
@@ -51,6 +52,8 @@ const authController = {
           res.status(200).json({ 
             message: `Verification code sent to ${user.email}`, 
             redirectTo: "/verify",
+            firstName: user.firstName,
+            lastName: user.lastName,
             userId: user._id, // Return user ID
             email: user.email // Return user email
           });
@@ -65,51 +68,54 @@ const authController = {
   },
   
 
-
-
   login: async (req, res) => {
+    const user = new User({
+      username: req.body.email,
+      password: req.body.password
+    });
 
-
-    passport.authenticate('local', (err, user, info) => {
+    req.login(user, async (err) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        console.log(err);
+      } else {
+        passport.authenticate("local", (err, user, info) => {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({ message: 'Internal Server Error' });
+          }
+
+          if (!user) {
+            return res.status(401).json({ message: 'Authentication failed' });
+          }
+
+          req.logIn(user, async (err) => {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({ message: 'Internal Server Error' });
+            }
+
+            // Prepare the response data
+            const responseData = {
+              message: 'Successfully logged in',
+              user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                isVerified: { status: user.isVerified, message: "check verification" },
+              },
+            };
+
+            res.status(201).json(responseData);
+          });
+        })(req, res);
       }
-      if (!user) {
-        return res.status(401).json({ message: 'Authentication failed' });
-      }
-      req.logIn(user, async (err) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ message: 'Internal Server Error' });
-        }
-        // Prepare the response data
-        const responseData = {
-          message: 'Successfully logged in',
-          user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            isVerified: { status: user.isVerified, message: "for email verification" },
-          },
-        };
-        res.status(201).json(responseData);
-      });
-    })(req, res);
+    });
   },
 
-  checkAuth: async (req, res) => {
-    if (req.user) {
-      res.status(201).json({ loggedIn: true, user: req.user });
-    } else {
-      res.status(201).json({ loggedIn: false });
-    }
-  },
-  
-  
-
-
-  logout: async function (req, res) {
+  logout: async (req, res) => {
     // Check if the user is authenticated
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -130,55 +136,48 @@ const authController = {
     }
   },
 
+  verify: async (req, res) => {
+    try {
+      const { userId } = req.params; // Extract userId from request params
+      const { verifyCode } = req.body; // Extract verification code from request body
 
+      // Find the user by userId
+      const user = await User.findById(userId);
 
-  // Verify 
- // Verify 
- // authController.js
+      // Check if the user exists
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
 
-verify: async (req, res) => {
-  try {
-    const { userId } = req.params; // Extract userId from request params
-    const { verifyCode } = req.body; // Extract verification code from request body
+      // Check if the user is already verified
+      if (user.isVerified) {
+        return res.status(400).json({ message: 'User is already verified' });
+      }
 
-    // Find the user by userId
-    const user = await User.findById(userId);
+      // Check if the verification code matches the one in the database
+      if (user.verificationcode !== verifyCode) {
+        return res.status(400).json({ message: 'Invalid verification code' });
+      }
 
-    // Check if the user exists
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // Update user's verification status
+      user.isVerified = true;
+      user.verificationcode = null; //clear the code after successful verification
+      await user.save();
+
+      // Return success response
+      return res.status(201).json({
+        message: 'Email Verified Successfully, you can login into your account now'
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Unexpected error during verification' });
     }
+  },
 
-    // Check if the user is already verified
-    if (user.isVerified) {
-      return res.status(400).json({ message: 'User is already verified' });
-    }
-
-    // Check if the verification code matches the one in the database
-    if (user.verificationcode !== verifyCode) {
-      return res.status(400).json({ message: 'Invalid verification code' });
-    }
-
-    // Update user's verification status
-    user.isVerified = true;
-    user.verificationcode = null; //clear the code after successful verification
-    await user.save();
-
-    // Return success response
-    return res.status(201).json({
-      message: 'Email Verified Successfully, you can login into your account now'
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Unexpected error during verification' });
+  // Placeholder for the missing checkAuth method
+  checkAuth: async (req, res) => {
+    res.status(200).json({ message: 'Authenticated' });
   }
-},
-
-
-
-
-
-
 };
 
 export default authController;

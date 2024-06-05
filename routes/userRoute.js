@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Welcome message
 router.get("/", (req, res) => {
-  res.json({ message: "Welcome to Newage coin user route" });
+  res.json({ message: "Welcome to Phylee backend user route" });
 });
 
 

@@ -7,7 +7,10 @@ import cors from 'cors';
 import { connect } from "./config/connectionState.js";
 import authRoute from "./routes/authRoute.js";
 import userRouter from './routes/userRoute.js';
-import balancesRouter from './routes/balancesRoute.js'
+
+
+
+
 
 
 
@@ -34,7 +37,7 @@ connect();
 
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRouter);
-app.use('/api/balances', balancesRouter);
+
 
 
 
