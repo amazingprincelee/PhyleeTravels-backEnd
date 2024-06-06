@@ -49,7 +49,7 @@ app.get("/api", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to newage coin" });
+    res.json({ message: "Welcome to phylee journeys" });
 });
 
 
