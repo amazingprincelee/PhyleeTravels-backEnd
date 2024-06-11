@@ -174,10 +174,13 @@ const authController = {
     }
   },
 
-  // Placeholder for the missing checkAuth method
   checkAuth: async (req, res) => {
-    res.status(200).json({ message: 'Authenticated' });
-  }
+    if (req.isAuthenticated()) {
+      res.status(200).json({ loggedIn: true });
+    } else {
+      res.status(200).json({ loggedIn: false });
+    }
+  },
 };
 
 export default authController;
