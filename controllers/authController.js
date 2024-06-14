@@ -116,11 +116,7 @@ const authController = {
   },
 
   logout: async (req, res) => {
-    // Check if the user is authenticated
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-
+    
     try {
       // Logout the user
       req.logout((err) => {
