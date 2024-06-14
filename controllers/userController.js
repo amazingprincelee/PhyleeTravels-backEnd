@@ -20,6 +20,8 @@ const userController = {
       // Base user profile
       let userProfile = {
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         phone: user.phone,
         email: user.email,
         emailVerification: user.isVerified
