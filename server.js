@@ -20,7 +20,13 @@ const app = express();
 
 
 // Middleware
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: 'http://localhost:3000', // Frontend origin
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
