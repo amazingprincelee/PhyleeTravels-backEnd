@@ -3,11 +3,11 @@ import 'dotenv/config.js';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: 'newagecoin.cash',
+  host: process.env.NODE_MAIL_HOST,
   port: 465,  
   auth: {
-    user: 'noreply@newagecoin.cash',
-    pass: 'J]2X8Ouu8&^h', // Password set directly here
+    user: process.env.NODE_MAIL_USER,
+    pass: process.env.NODE_MAIL_PWDS, 
   },
 });
 
