@@ -15,6 +15,13 @@ const userSchema = new mongoose.Schema({
   isAdmin: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },
   verificationcode: String,
+  postgraduate: { type: mongoose.Schema.Types.ObjectId, ref: 'Postgraduate', default: null },
+  undergraduate: { type: mongoose.Schema.Types.ObjectId, ref: 'Undergraduate', default: null },
+  schengenTourist: { type: mongoose.Schema.Types.ObjectId, ref: 'SchengenTourist', default: null },
+  turkeyTourist: { type: mongoose.Schema.Types.ObjectId, ref: 'TurkeyTourist', default: null },
+  southAfricaTourist: { type: mongoose.Schema.Types.ObjectId, ref: 'SouthAfricaTourist', default: null },
+  eastAfrica: { type: mongoose.Schema.Types.ObjectId, ref: 'EastAfrica', default: null },
+  moroccoVisa: { type: mongoose.Schema.Types.ObjectId, ref: 'MoroccoVisa', default: null },
 });
 
 // Add passport-local-mongoose plugin with usernameField set to 'email'

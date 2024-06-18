@@ -3,6 +3,16 @@ import passport from "passport";
 import User from "../models/user.js";
 import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
+import {
+  Postgraduate,
+  Undergraduate,
+  SchengenTourist,
+  TurkeyTourist,
+  SouthAfricaTourist,
+  EastAfrica,
+  MoroccoVisa
+} from "../models/servicesModel.js";
+
 
 
 // Generate verification code
@@ -12,55 +22,70 @@ const authController = {
   register: async (req, res) => {
     try {
       const { firstName, lastName, email, password, phone } = req.body;
-  
+
       // Generate verification code
-      const verificationcode = generateVerificationCode();
-  
+      const verificationCode = generateVerificationCode();
+
       // Create a new user instance
       const newUser = new User({
         firstName,
         lastName,
         email,
         phone,
-        verificationcode,
+        verificationCode,
       });
-  
+
       // Register the user
       await User.register(newUser, password, async (err, user) => {
         if (err) {
-          // Handle registration errors
           console.error(err);
           if (err.name === 'UserExistsError') {
             return res.status(400).json({ message: 'User already registered' });
           } else {
-            console.error(err);
             return res.status(500).json({ message: 'Internal Server Error' });
           }
         }
-  
-        // Send verification code via email
+
+        // Create related documents and associate them with the user
         try {
-          await sendVerificationEmail(user.email, verificationcode);
-        } catch (emailError) {
-          console.error('Error sending verification email:', emailError);
-          // Handle email sending error
-          return res.status(500).json({ message: 'Error sending verification email' });
-        }
-  
-        passport.authenticate('local')(req, res, () => {
+          const postgraduate = await Postgraduate.create({ email: user.email });
+          const undergraduate = await Undergraduate.create({ email: user.email });
+          const schengenTourist = await SchengenTourist.create({ email: user.email });
+          const turkeyTourist = await TurkeyTourist.create({ email: user.email });
+          const southAfricaTourist = await SouthAfricaTourist.create({ email: user.email });
+          const eastAfrica = await EastAfrica.create({ email: user.email });
+          const moroccoVisa = await MoroccoVisa.create({ email: user.email });
+
+          // Associate the created documents with the user
+          user.postgraduate = postgraduate._id;
+          user.undergraduate = undergraduate._id;
+          user.schengenTourist = schengenTourist._id;
+          user.turkeyTourist = turkeyTourist._id;
+          user.southAfricaTourist = southAfricaTourist._id;
+          user.eastAfrica = eastAfrica._id;
+          user.moroccoVisa = moroccoVisa._id;
+
+          // Save the user with the associated document IDs
+          await user.save();
+
+          // Send verification code via email
+          await sendVerificationEmail(user.email, verificationCode);
+
           // Redirect to verify route
-          res.status(200).json({ 
-            message: `Verification code sent to ${user.email}`, 
+          res.status(200).json({
+            message: `Verification code sent to ${user.email}`,
             redirectTo: "/verify",
             firstName: user.firstName,
             lastName: user.lastName,
             userId: user._id, // Return user ID
             email: user.email // Return user email
           });
-        });
-        
-        
-    });
+        } catch (error) {
+          console.error('Error creating related documents:', error);
+          return res.status(500).json({ message: 'Error creating related documents' });
+        }
+      });
+
     } catch (error) {
       console.error('Error during registration:', error);
       return res.status(500).json({ message: 'Unexpected error during registration' });
