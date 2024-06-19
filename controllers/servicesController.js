@@ -6,6 +6,7 @@ const serviceController = {
         await handleFileUploads(req, res, Postgraduate);
     },
     undergraduate: async (req, res) => {
+        console.log('Undergraduate file upload endpoint hit');
         await handleFileUploads(req, res, Undergraduate);
     },
     schengenTourist: async (req, res) => {
