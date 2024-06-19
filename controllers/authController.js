@@ -3,19 +3,28 @@ import passport from "passport";
 import User from "../models/user.js";
 import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
+import {
+  Undergraduate,
+  Postgraduate,
+  MoroccoVisa,
+  SchengenTourist,
+  SouthAfricaTourist,
+  EastAfrica,
+  TurkeyTourist
+} from '../models/servicesModel.js';
 
 
-// Generate verification code
-const verificationCode = generateVerificationCode();
+
 
 const authController = {
+
   register: async (req, res) => {
     try {
       const { firstName, lastName, email, password, phone } = req.body;
-  
+
       // Generate verification code
       const verificationcode = generateVerificationCode();
-  
+
       // Create a new user instance
       const newUser = new User({
         firstName,
@@ -24,7 +33,7 @@ const authController = {
         phone,
         verificationcode,
       });
-  
+
       // Register the user
       await User.register(newUser, password, async (err, user) => {
         if (err) {
@@ -37,7 +46,7 @@ const authController = {
             return res.status(500).json({ message: 'Internal Server Error' });
           }
         }
-  
+
         // Send verification code via email
         try {
           await sendVerificationEmail(user.email, verificationcode);
@@ -46,11 +55,24 @@ const authController = {
           // Handle email sending error
           return res.status(500).json({ message: 'Error sending verification email' });
         }
-  
+
+        // Create associated documents in service models
+        const servicePromises = [
+          new Postgraduate({ email: user.email }).save(),
+          new Undergraduate({ email: user.email }).save(),
+          new SchengenTourist({ email: user.email }).save(),
+          new TurkeyTourist({ email: user.email }).save(),
+          new SouthAfricaTourist({ email: user.email }).save(),
+          new EastAfrica({ email: user.email }).save(),
+          new MoroccoVisa({ email: user.email }).save(),
+        ];
+
+        await Promise.all(servicePromises);
+
         passport.authenticate('local')(req, res, () => {
           // Redirect to verify route
-          res.status(200).json({ 
-            message: `Verification code sent to ${user.email}`, 
+          res.status(200).json({
+            message: `Verification code sent to ${user.email}`,
             redirectTo: "/verify",
             firstName: user.firstName,
             lastName: user.lastName,
@@ -58,9 +80,7 @@ const authController = {
             email: user.email // Return user email
           });
         });
-        
-        
-    });
+      });
     } catch (error) {
       console.error('Error during registration:', error);
       return res.status(500).json({ message: 'Unexpected error during registration' });
