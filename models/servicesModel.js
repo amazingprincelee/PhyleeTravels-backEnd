@@ -12,7 +12,6 @@ const postgraduateSchema = new mongoose.Schema({
     internationalPassport: { type: String, default: null },
     recommendationLetters: [{ type: String, default: null }],  // Array for multiple letters
     personalStatement: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     ielts: { type: String, default: "200,000" },
     serviceCharge: { type: String, default: "200,000" },
     balance: { type: Number, default: 0 },
@@ -25,8 +24,7 @@ const undergraduateSchema = new mongoose.Schema({
     curriculumVitae: { type: String, default: null },
     birthDocument: { type: String, default: null },  // Birth certificate
     passportDataPage: { type: String, default: null },  // Data page of International Passport
-    recommendationLetters: [{ type: String, default: null }],
-    proofOfPayment: { type: String, default: null },
+    recommendationLetters: [{ type: String, default: null }],  // Array for multiple letters
     ielts: { type: String, default: "200,000" },
     serviceCharge: { type: String, default: "200,000" },
     balance: { type: Number, default: 0 },
@@ -40,7 +38,6 @@ const schengenTouristSchema = new mongoose.Schema({
     workDetails: { type: String, default: null },
     introductionLetter: { type: String, default: null },
     cacDocuments: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     visaDuration: String,
     fees: {
         processingFee: { type: String, default: "200,000" },
@@ -65,7 +62,6 @@ const turkeyTouristSchema = new mongoose.Schema({
     proofOfAccommodation: { type: String, default: null },
     returnTicket: { type: String, default: null },
     passportPhotos: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     fees: {
         processingFee: { type: String, default: "200,000" },
         applicationFee: { type: String, default: "200,000" },
@@ -86,7 +82,6 @@ const southAfricaTouristSchema = new mongoose.Schema({
     workDetails: { type: String, default: null },
     introductionLetter: { type: String, default: null },
     cacDocuments: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     fees: {
         processingFee: { type: String, default: "200,000" },
         childFee: { type: String, default: "200,000" },
@@ -105,7 +100,6 @@ const eastAfricaVisaSchema = new mongoose.Schema({
     internationalPassport: { type: String, default: null },
     passportPhoto: { type: String, default: null },
     yellowFeverCard: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     fee: { type: Number, required: true, default: 250000 },
     visaDuration: { type: String, default: '90 days Visa' },
     approvalDuration: { type: String, default: '7 days'}
@@ -121,7 +115,6 @@ const moroccoVisaSchema = new mongoose.Schema({
     ninSlip: { type: String, default: null },
     birthCertificateOrAffidavit: { type: String, default: null },
     marriageCertificate: { type: String, default: null },
-    proofOfPayment: { type: String, default: null },
     fee: { type: Number, required: true, default: 250000 },
     visaDuration: { type: String, default: '90 days Visa' },
     approvalDuration: { type: String, default: '7 days'}
