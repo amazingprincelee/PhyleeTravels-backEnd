@@ -3,16 +3,6 @@ import passport from "passport";
 import User from "../models/user.js";
 import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
-import {
-  Postgraduate,
-  Undergraduate,
-  SchengenTourist,
-  TurkeyTourist,
-  SouthAfricaTourist,
-  EastAfrica,
-  MoroccoVisa
-} from "../models/servicesModel.js";
-
 
 
 // Generate verification code
@@ -24,7 +14,7 @@ const authController = {
       const { firstName, lastName, email, password, phone } = req.body;
   
       // Generate verification code
-      const verificationCode = generateVerificationCode();
+      const verificationcode = generateVerificationCode();
   
       // Create a new user instance
       const newUser = new User({
@@ -32,65 +22,50 @@ const authController = {
         lastName,
         email,
         phone,
-        verificationCode,
+        verificationcode,
       });
   
       // Register the user
       await User.register(newUser, password, async (err, user) => {
         if (err) {
+          // Handle registration errors
           console.error(err);
           if (err.name === 'UserExistsError') {
             return res.status(400).json({ message: 'User already registered' });
           } else {
+            console.error(err);
             return res.status(500).json({ message: 'Internal Server Error' });
           }
         }
   
-        // Create related documents and associate them with the user
+        // Send verification code via email
         try {
-          const services = [
-            { model: Postgraduate, name: 'postgraduate' },
-            { model: Undergraduate, name: 'undergraduate' },
-            { model: SchengenTourist, name: 'schengenTourist' },
-            { model: TurkeyTourist, name: 'turkeyTourist' },
-            { model: SouthAfricaTourist, name: 'southAfricaTourist' },
-            { model: EastAfrica, name: 'eastAfrica' },
-            { model: MoroccoVisa, name: 'moroccoVisa' },
-          ];
+          await sendVerificationEmail(user.email, verificationcode);
+        } catch (emailError) {
+          console.error('Error sending verification email:', emailError);
+          // Handle email sending error
+          return res.status(500).json({ message: 'Error sending verification email' });
+        }
   
-          const createdServices = await Promise.all(services.map(async (service) => {
-            const serviceInstance = await service.model.create({ email: user.email });
-            user[service.name] = serviceInstance._id;
-            return serviceInstance;
-          }));
-  
-          // Save the user with the associated document IDs
-          await user.save();
-  
-          // Send verification code via email
-          await sendVerificationEmail(user.email, verificationCode);
-  
+        passport.authenticate('local')(req, res, () => {
           // Redirect to verify route
-          res.status(200).json({
-            message: `Verification code sent to ${user.email}`,
+          res.status(200).json({ 
+            message: `Verification code sent to ${user.email}`, 
             redirectTo: "/verify",
             firstName: user.firstName,
             lastName: user.lastName,
             userId: user._id, // Return user ID
             email: user.email // Return user email
           });
-        } catch (error) {
-          console.error('Error creating related documents:', error);
-          return res.status(500).json({ message: 'Error creating related documents' });
-        }
-      });
-  
+        });
+        
+        
+    });
     } catch (error) {
       console.error('Error during registration:', error);
       return res.status(500).json({ message: 'Unexpected error during registration' });
     }
   },
-  
   
 
   login: async (req, res) => {
