@@ -22,10 +22,10 @@ const authController = {
   register: async (req, res) => {
     try {
       const { firstName, lastName, email, password, phone } = req.body;
-
+  
       // Generate verification code
       const verificationCode = generateVerificationCode();
-
+  
       // Create a new user instance
       const newUser = new User({
         firstName,
@@ -34,7 +34,7 @@ const authController = {
         phone,
         verificationCode,
       });
-
+  
       // Register the user
       await User.register(newUser, password, async (err, user) => {
         if (err) {
@@ -45,32 +45,31 @@ const authController = {
             return res.status(500).json({ message: 'Internal Server Error' });
           }
         }
-
+  
         // Create related documents and associate them with the user
         try {
-          const postgraduate = await Postgraduate.create({ email: user.email });
-          const undergraduate = await Undergraduate.create({ email: user.email });
-          const schengenTourist = await SchengenTourist.create({ email: user.email });
-          const turkeyTourist = await TurkeyTourist.create({ email: user.email });
-          const southAfricaTourist = await SouthAfricaTourist.create({ email: user.email });
-          const eastAfrica = await EastAfrica.create({ email: user.email });
-          const moroccoVisa = await MoroccoVisa.create({ email: user.email });
-
-          // Associate the created documents with the user
-          user.postgraduate = postgraduate._id;
-          user.undergraduate = undergraduate._id;
-          user.schengenTourist = schengenTourist._id;
-          user.turkeyTourist = turkeyTourist._id;
-          user.southAfricaTourist = southAfricaTourist._id;
-          user.eastAfrica = eastAfrica._id;
-          user.moroccoVisa = moroccoVisa._id;
-
+          const services = [
+            { model: Postgraduate, name: 'postgraduate' },
+            { model: Undergraduate, name: 'undergraduate' },
+            { model: SchengenTourist, name: 'schengenTourist' },
+            { model: TurkeyTourist, name: 'turkeyTourist' },
+            { model: SouthAfricaTourist, name: 'southAfricaTourist' },
+            { model: EastAfrica, name: 'eastAfrica' },
+            { model: MoroccoVisa, name: 'moroccoVisa' },
+          ];
+  
+          const createdServices = await Promise.all(services.map(async (service) => {
+            const serviceInstance = await service.model.create({ email: user.email });
+            user[service.name] = serviceInstance._id;
+            return serviceInstance;
+          }));
+  
           // Save the user with the associated document IDs
           await user.save();
-
+  
           // Send verification code via email
           await sendVerificationEmail(user.email, verificationCode);
-
+  
           // Redirect to verify route
           res.status(200).json({
             message: `Verification code sent to ${user.email}`,
@@ -85,12 +84,13 @@ const authController = {
           return res.status(500).json({ message: 'Error creating related documents' });
         }
       });
-
+  
     } catch (error) {
       console.error('Error during registration:', error);
       return res.status(500).json({ message: 'Unexpected error during registration' });
     }
   },
+  
   
 
   login: async (req, res) => {
