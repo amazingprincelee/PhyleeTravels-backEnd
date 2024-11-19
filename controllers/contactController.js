@@ -4,33 +4,27 @@ const contactController = {
   submitContactForm: async (req, res) => {
     try {
       const {
-        firstName, lastName, email, phoneNumber, preferredStudyDestination,
-        whenPlanToStudy, nearestPhyleeJourneysOffice, preferredStudyLevel,
-        agreeToTerms, receiveUpdates, contactByPhone, contactByEmail, contactBySMS
+        fullName, email, phoneNumber, preferredStudyDestination,
+        whenPlanYourJourney, kindOfJourney, preferredStudyLevel,
+        agreeToTerms, message
       } = req.body;
 
-      if (!firstName || !lastName || !email || !phoneNumber || !preferredStudyDestination ||
-        !whenPlanToStudy || !nearestPhyleeJourneysOffice || !preferredStudyLevel ||
-        agreeToTerms === undefined || receiveUpdates === undefined || 
-        contactByPhone === undefined || contactByEmail === undefined || 
-        contactBySMS === undefined) {
+      if (!fullName  || !email || !phoneNumber || !preferredStudyDestination ||
+        !whenPlanYourJourney || !kindOfJourney || !message || !preferredStudyLevel ||
+        agreeToTerms === undefined) {
         return res.status(400).json({ error: 'All fields are required' });
       }
 
       const newContact = new Contact({
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
+        fullName, 
+        email, 
+        phoneNumber, 
         preferredStudyDestination,
-        whenPlanToStudy,
-        nearestPhyleeJourneysOffice,
+        whenPlanYourJourney, 
+        kindOfJourney, 
         preferredStudyLevel,
-        agreeToTerms,
-        receiveUpdates,
-        contactByPhone,
-        contactByEmail,
-        contactBySMS
+        agreeToTerms, 
+        message
       });
 
       const savedContact = await newContact.save();
