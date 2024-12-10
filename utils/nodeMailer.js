@@ -26,10 +26,10 @@ transporter.verify(function(error, success) {
 
 export const sendVerificationEmail = async (to, code) => {
   const mailOptions = {
-    from: 'no-reply@phyleejourneys.com',
+    from: 'no-reply@phyleetravels.com',
     to,
     subject: 'Phylee verification Code',
-    text: `Dear User,\n\nYour verification code is: ${code}\n\nThank you for choosing Phylee Journeys.\n\nBest regards,\nPhylee journeys Team`,
+    text: `Dear User,\n\nYour verification code is: ${code}\n\nThank you for choosing Phylee Travels & Tour.\n\nBest regards,\nPhylee Travels & Tour Team`,
   };
 
   return transporter.sendMail(mailOptions);

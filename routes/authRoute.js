@@ -12,19 +12,15 @@ router.get("/", (req, res) => {
   res.json({ message: "Welcome phylee backend json file" });
 });
 
-router.get("/check-auth", authController.checkAuth);
-
-
-
 
 // Logout route
-router.get("/logout", authController.logout);
+router.post("/auth/logout", authController.logout);
 
 
 // Registration and login routes
-router.post("/register", authController.register);
-router.post("/login", authController.login);
-router.post("/verify/:userId", authController.verify);
+router.post("/auth/register", authController.register);
+router.post("/auth/login", authController.login);
+router.post("/auth/verify/:userId", authController.verify);
 
 
 

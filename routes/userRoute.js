@@ -1,5 +1,6 @@
 import express from "express";
 import userController from "../controllers/userController.js";
+import { authenticateJWT } from "../middleware/auth.js";
 
 
 const router = express.Router();
@@ -13,14 +14,14 @@ router.get("/", (req, res) => {
 
 
 //get users profile
-router.get("/profile/:userId", userController.getProfile);
+router.get("/user/profile/:userId", authenticateJWT, userController.getProfile);
 
 
-router.put("/updateProfile/:userId",  userController.upDateprofile);
+router.put("/user/updateProfile/:userId", authenticateJWT,  userController.upDateprofile);
 
-router.post("/reset-password/:userId", userController.resetPassword);
-router.post('/forgot-password', userController.forgotPassword);
-router.post('/reset-password', userController.resetPasswordWithToken);
+router.post("/user/reset-password/:userId", userController.resetPassword);
+router.post('/user/forgot-password', userController.forgotPassword);
+router.post('/user/reset-password', userController.resetPasswordWithToken);
 
 
 

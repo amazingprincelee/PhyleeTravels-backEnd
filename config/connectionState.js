@@ -15,21 +15,32 @@ const connect = async () => {
 
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 15000, // Adjust for network latency
+      socketTimeoutMS: 45000,          // Allow longer operations
     });
 
-    
-    
     connectionState.connected = true;
     console.log("Database Connected!");
   } catch (error) {
     connectionState.error = error;
-    console.error("Connection error:", error);
+    console.error("Connection error:", error.stack || error);
   } finally {
     connectionState.connecting = false;
   }
 };
+
+// Handle mongoose connection events
+mongoose.connection.on("connected", () => {
+  console.log("Mongoose connected to the database.");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("Mongoose connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("Mongoose disconnected from the database.");
+});
 
 const disconnect = async () => {
   try {
@@ -40,5 +51,12 @@ const disconnect = async () => {
     console.error("Error while disconnecting:", error);
   }
 };
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  await disconnect();
+  console.log("Application exited. Database connection closed.");
+  process.exit(0);
+});
 
 export { connectionState, connect, disconnect };

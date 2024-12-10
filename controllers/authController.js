@@ -1,202 +1,117 @@
 // authController.js
-import passport from "passport";
 import User from "../models/user.js";
+import { generateToken, verifyToken } from "../utils/jwt.js";
 import { sendVerificationEmail } from "../utils/nodeMailer.js";
 import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
-import {
-  Undergraduate,
-  Postgraduate,
-  MoroccoVisa,
-  SchengenTourist,
-  SouthAfricaTourist,
-  EastAfrica,
-  TurkeyTourist
-} from '../models/servicesModel.js';
 
 
 
+// Blacklist for invalidated tokens
+const tokenBlacklist = new Set();
+
+// Cleanup function
+const cleanupBlacklist = () => {
+  tokenBlacklist.forEach(token => {
+    const isExpired = checkTokenExpiration(token); // Implement checkTokenExpiration
+    if (isExpired) tokenBlacklist.delete(token);
+  });
+};
+
+// Periodically clean up the blacklist
+setInterval(cleanupBlacklist, 3600000);
 
 const authController = {
-
   register: async (req, res) => {
     try {
       const { firstName, lastName, email, password, phone } = req.body;
 
-      // Generate verification code
       const verificationcode = generateVerificationCode();
+      
+      const newUser = new User({ firstName, lastName, email: email.toLowerCase(), phone, password, verificationcode });
+      await newUser.save();
 
-      // Create a new user instance
-      const newUser = new User({
-        firstName,
-        lastName,
-        email,
-        phone,
-        verificationcode,
-      });
+      await sendVerificationEmail(email, verificationcode);
 
-      // Register the user
-      await User.register(newUser, password, async (err, user) => {
-        if (err) {
-          // Handle registration errors
-          console.error(err);
-          if (err.name === 'UserExistsError') {
-            return res.status(400).json({ message: 'User already registered' });
-          } else {
-            console.error(err);
-            return res.status(500).json({ message: 'Internal Server Error' });
-          }
-        }
-
-        // Send verification code via email
-        try {
-          await sendVerificationEmail(user.email, verificationcode);
-        } catch (emailError) {
-          console.error('Error sending verification email:', emailError);
-          // Handle email sending error
-          return res.status(500).json({ message: 'Error sending verification email' });
-        }
-
-        // Create associated documents in service models
-        const servicePromises = [
-          new Postgraduate({ email: user.email }).save(),
-          new Undergraduate({ email: user.email }).save(),
-          new SchengenTourist({ email: user.email }).save(),
-          new TurkeyTourist({ email: user.email }).save(),
-          new SouthAfricaTourist({ email: user.email }).save(),
-          new EastAfrica({ email: user.email }).save(),
-          new MoroccoVisa({ email: user.email }).save(),
-        ];
-
-        await Promise.all(servicePromises);
-
-        passport.authenticate('local')(req, res, () => {
-          // Redirect to verify route
-          res.status(200).json({
-            message: `Verification code sent to ${user.email}`,
-            redirectTo: "/verify",
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userId: user._id, // Return user ID
-            email: user.email // Return user email
-          });
-        });
-      });
+      res.status(201).json({ message: "Registration successful. Verify your email to log in." });
     } catch (error) {
-      console.error('Error during registration:', error);
-      return res.status(500).json({ message: 'Unexpected error during registration' });
+      console.error(error);
+      res.status(500).json({ message: "Error during registration" });
+    }
+  },
+
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      console.log("Login request received for email:", email);
+  
+      const user = await User.findOne({ email: email.toLowerCase() });
+      console.log("User found:", user);
+  
+      if (!user) {
+        console.log("User not found.");
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+  
+      const isPasswordValid = await user.comparePassword(password);
+      console.log("Password validation result:", isPasswordValid);
+  
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+  
+  
+      const token = generateToken({ id: user._id, name:user.firstName, role: user.role, emailVerification: user.isVerified });
+      console.log("Token generated:", token);
+  
+      res.status(200).json({ token, message: "Login successful" });
+    } catch (error) {
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Error during login" });
     }
   },
   
 
-  login: async (req, res) => {
-    const user = new User({
-      username: req.body.email,
-      password: req.body.password
-    });
-
-    req.login(user, async (err) => {
-      if (err) {
-        console.log(err);
-      } else {
-        passport.authenticate("local", (err, user, info) => {
-          if (err) {
-            console.log(err);
-            return res.status(500).json({ message: 'Internal Server Error' });
-          }
-
-          if (!user) {
-            return res.status(401).json({ message: 'Authentication failed' });
-          }
-
-          req.logIn(user, async (err) => {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({ message: 'Internal Server Error' });
-            }
-
-            // Prepare the response data
-            const responseData = {
-              message: 'Successfully logged in',
-              user: {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                isVerified: { status: user.isVerified, message: "check verification" },
-              },
-            };
-
-            res.status(201).json(responseData);
-          });
-        })(req, res);
-      }
-    });
-  },
-
-  logout: async (req, res) => {
-    
-    try {
-      // Logout the user
-      req.logout((err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          res.status(200).json({ message: "Successfully logged out" });
-        }
-      });
-    } catch (error) {
-      console.error('Error during logout:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  },
-
   verify: async (req, res) => {
     try {
-      const { userId } = req.params; // Extract userId from request params
-      const { verifyCode } = req.body; // Extract verification code from request body
-
-      // Find the user by userId
+      const { userId, verifyCode } = req.body;
       const user = await User.findById(userId);
 
-      // Check if the user exists
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      if (!user || user.verificationcode !== verifyCode) {
+        return res.status(400).json({ message: "Invalid verification code" });
       }
 
-      // Check if the user is already verified
-      if (user.isVerified) {
-        return res.status(400).json({ message: 'User is already verified' });
-      }
-
-      // Check if the verification code matches the one in the database
-      if (user.verificationcode !== verifyCode) {
-        return res.status(400).json({ message: 'Invalid verification code' });
-      }
-
-      // Update user's verification status
       user.isVerified = true;
-      user.verificationcode = null; //clear the code after successful verification
+      user.verificationcode = null;
       await user.save();
 
-      // Return success response
-      return res.status(201).json({
-        message: 'Email Verified Successfully, you can login into your account now'
-      });
+      res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Unexpected error during verification' });
+      res.status(500).json({ message: "Error during verification" });
     }
   },
 
-  checkAuth: async (req, res) => {
-    if (req.isAuthenticated()) {
-      res.status(200).json({ loggedIn: true });
-    } else {
-      res.status(200).json({ loggedIn: false });
+
+  logout: (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(400).json({ message: "No token provided" });
+    }
+  
+    const token = authHeader.split(" ")[1];
+  
+    try {
+      verifyToken(token); // Ensure token is valid
+      tokenBlacklist.add(token); // Blacklist the token
+      res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+      res.status(403).json({ message: "Invalid or expired token" });
     }
   },
+
 };
+
+
 
 export default authController;

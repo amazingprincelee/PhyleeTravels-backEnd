@@ -1,5 +1,5 @@
 // adminController.js
-
+import User from "../models/user.js";
 import {
     Postgraduate,
     Undergraduate,
@@ -11,6 +11,58 @@ import {
 } from '../models/servicesModel.js';
 
 const adminController = {
+
+
+     // Create a new admin user
+     createAdmin: async (req, res) => {
+        const { firstName, lastName, email, phone, password } = req.body;
+    
+        // Ensure the requesting user is a superadmin
+        if (!req.user || req.user.role !== 'superadmin') {
+            return res.status(403).json({ error: 'Forbidden: Only superadmins can create admins' });
+        }
+    
+        // Validate input fields
+        if (!firstName || !lastName || !email || !password) {
+            return res.status(400).json({ error: 'All fields (firstName, lastName, email, password) are required' });
+        }
+    
+        try {
+            // Check if the user already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ error: 'User with this email already exists' });
+            }
+    
+            // Create the admin user
+            const newAdmin = new User({
+                firstName,
+                lastName,
+                email,
+                phone,
+                password, // Password hashing handled in pre-save middleware
+                role: 'admin', // Assign the 'admin' role
+            });
+    
+            await newAdmin.save();
+    
+            res.status(201).json({
+                message: 'Admin created successfully',
+                admin: {
+                    id: newAdmin._id,
+                    firstName: newAdmin.firstName,
+                    lastName: newAdmin.lastName,
+                    email: newAdmin.email,
+                    phone: newAdmin.phone,
+                    role: newAdmin.role,
+                },
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Server error' });
+        }
+    },
+    
     // Update all Postgraduate documents
     updateAllPostgraduates: async (req, res) => {
         const { ielts, serviceCharge, balance, amountPaid } = req.body;

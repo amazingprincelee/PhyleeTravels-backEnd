@@ -1,42 +1,34 @@
 import mongoose from "mongoose";
-import passport from "passport";
-import passportLocalMongoose from "passport-local-mongoose";
+import bcrypt from "bcryptjs";
 
-// User schema 
 const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
-  password: String,
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: false },
+  password: { type: String, required: true },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
-  role: { type: String, required: false },
-  email: { type: String, required: true, unique: true }, 
-  phone: { type: String, required: false },
+  role: { type: String },
   isAdmin: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },
   verificationcode: String,
-  
 });
 
-// Add passport-local-mongoose plugin with usernameField set to 'email'
-userSchema.plugin(passportLocalMongoose, { usernameField: 'email' });
+// Hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function (password) {
+  const isMatch = await bcrypt.compare(password, this.password);
+  console.log("Password match:", isMatch);
+  return isMatch;
+};
+
 
 const User = mongoose.model("User", userSchema);
-
-passport.use(User.createStrategy());
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then(user => {
-      done(null, user);
-    })
-    .catch(err => {
-      done(err, null);
-    });
-});
-
 export default User;
