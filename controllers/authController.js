@@ -7,7 +7,7 @@ import { generateVerificationCode } from "../utils/verficationCodeGenerator.js";
 
 
 // Blacklist for invalidated tokens
-const tokenBlacklist = new Set();
+export const tokenBlacklist = new Set();
 
 // Cleanup function
 const cleanupBlacklist = () => {

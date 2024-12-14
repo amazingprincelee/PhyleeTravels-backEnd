@@ -10,6 +10,7 @@ import eventRoutes from './routes/eventRoute.js';
 import contactRoutes from './routes/contactRoute.js';
 import servicesRoutes from './routes/servicesRoute.js';
 import adminRoute from './routes/adminRoute.js';
+import staffRoute from './routes/staffRoute.js';
 
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api', eventRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', servicesRoutes);
 app.use('/api', adminRoute);
+app.use('/api', staffRoute);
 
 
 

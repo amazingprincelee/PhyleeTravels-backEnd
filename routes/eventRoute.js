@@ -17,6 +17,8 @@ router.post(
   eventController.registerForEvent
 );
 router.get("/event/all_events", eventController.getAllEvents);
+// Add the route in your routes file
+router.get('/event/registrations/:eventId', eventController.getAllRegistrationsForEvent);
 router.delete("/event/delete_event/:eventId", authorizeRoles("superAdmin", "admin"), eventController.deleteEvent);
 
 export default router;

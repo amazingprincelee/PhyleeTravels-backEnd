@@ -1,3 +1,4 @@
+//src/models/user.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -9,7 +10,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
-  role: { type: String },
+  role: { type: String, enum: ['user', 'admin', 'staff', 'Tour Agent', 'Admission Officer'], default: 'user' },
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   isAdmin: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },
   verificationcode: String,
