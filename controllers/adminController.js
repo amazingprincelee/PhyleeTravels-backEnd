@@ -8,12 +8,12 @@ import {
     SouthAfricaTourist,
     EastAfrica,
     MoroccoVisa
-} from '../models/servicesModel.js';
+} from '../models/applicationModel.js';
 
 const adminController = {
 
 
-     // Create a new admin user
+     // Create a new staff user
      createAdmin: async (req, res) => {
         const { firstName, lastName, email, phone, password } = req.body;
     
@@ -62,6 +62,37 @@ const adminController = {
             res.status(500).json({ error: 'Server error' });
         }
     },
+
+    assignToStaff: async (req, res) => {
+        
+        const { email, serviceType, staffId } = req.body;
+      
+        const models = {
+          postgraduate: Postgraduate,
+          undergraduate: Undergraduate,
+          schengenTourist: SchengenTourist,
+        };
+      
+        const Model = models[serviceType];
+        if (!Model) {
+          return res.status(400).json({ message: "Invalid service type." });
+        }
+      
+        try {
+          const userFiles = await Model.findOneAndUpdate(
+            { email },
+            { assignedTo: staffId },
+            { new: true }
+          );
+          if (!userFiles) {
+            return res.status(404).json({ message: "Files not found for the user." });
+          }
+          res.status(200).json({ message: "Files assigned successfully.", files: userFiles });
+        } catch (error) {
+          console.error("Error assigning files to staff:", error);
+          res.status(500).json({ message: "Error assigning files to staff." });
+        }
+      },
     
     // Update all Postgraduate documents
     updateAllPostgraduates: async (req, res) => {

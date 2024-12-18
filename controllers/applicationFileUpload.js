@@ -1,7 +1,8 @@
-import { Postgraduate, Undergraduate, SchengenTourist, TurkeyTourist, SouthAfricaTourist, EastAfrica, MoroccoVisa } from '../models/servicesModel.js';
+//controller/applicationFileUpload
+import { Postgraduate, Undergraduate, SchengenTourist, TurkeyTourist, SouthAfricaTourist, EastAfrica, MoroccoVisa } from '../models/applicationModel.js';
 import { upload as cloudinaryUpload } from '../config/cloudinary.js';
 
-const serviceController = {
+const applicationFileUpload = {
     postGraduate: async (req, res) => {
         await handleFileUploads(req, res, Postgraduate);
     },
@@ -78,4 +79,4 @@ const handleFileUploads = async (req, res, Model) => {
     }
 };
 
-export default serviceController;
+export default applicationFileUpload;

@@ -1,9 +1,10 @@
-// servicesModel.js
+// applicationModel.js
 
 import mongoose from "mongoose";
 
 const postgraduateSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     waecNeco: { type: String, default: null },  // WAEC/NECO
     degreeCertificate: { type: String, default: null },
     degreeTranscript: { type: String, default: null },
@@ -20,6 +21,7 @@ const postgraduateSchema = new mongoose.Schema({
 
 const undergraduateSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     waecNeco: { type: String, default: null },  // WAEC/NECO
     curriculumVitae: { type: String, default: null },
     birthDocument: { type: String, default: null },  // Birth certificate
@@ -33,6 +35,7 @@ const undergraduateSchema = new mongoose.Schema({
 
 const schengenTouristSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     internationalPassport: { type: String, default: null },
     bankStatement: { type: String, default: null },
     workDetails: { type: String, default: null },
@@ -53,6 +56,7 @@ const schengenTouristSchema = new mongoose.Schema({
 
 const turkeyTouristSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     internationalPassport: { type: String, default: null},
     bankStatement: { type: String, default: null },
     workDetails: { type: String, default: null },
@@ -77,6 +81,7 @@ const turkeyTouristSchema = new mongoose.Schema({
 
 const southAfricaTouristSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     internationalPassport: { type: String, default: null },
     bankStatement: { type: String, default: null },
     workDetails: { type: String, default: null },
@@ -97,6 +102,7 @@ const southAfricaTouristSchema = new mongoose.Schema({
 
 const eastAfricaVisaSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     internationalPassport: { type: String, default: null },
     passportPhoto: { type: String, default: null },
     yellowFeverCard: { type: String, default: null },
@@ -107,6 +113,7 @@ const eastAfricaVisaSchema = new mongoose.Schema({
 
 const moroccoVisaSchema = new mongoose.Schema({
     email: { type: String, required: true },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     internationalPassport: { type: String, default: null },
     bankStatement: { type: String, default: null },
     introductionLetter: { type: String, default: null },

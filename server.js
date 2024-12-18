@@ -8,9 +8,10 @@ import authRoute from "./routes/authRoute.js";
 import userRouter from './routes/userRoute.js';
 import eventRoutes from './routes/eventRoute.js';
 import contactRoutes from './routes/contactRoute.js';
-import servicesRoutes from './routes/servicesRoute.js';
+import applicationFileUpload from './routes/applicationFileUpload.js';
 import adminRoute from './routes/adminRoute.js';
 import staffRoute from './routes/staffRoute.js';
+import paymentRoute from './routes/paymentRoute.js';
 
 
 const app = express();
@@ -35,9 +36,10 @@ app.use("/api", authRoute);
 app.use("/api", userRouter);
 app.use('/api', eventRoutes);
 app.use('/api', contactRoutes);
-app.use('/api', servicesRoutes);
+app.use('/api', applicationFileUpload);
 app.use('/api', adminRoute);
 app.use('/api', staffRoute);
+app.use('/api', paymentRoute);
 
 
 
